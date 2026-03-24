@@ -1,30 +1,27 @@
-Smart Home Hub - Systemdokumentation
-Detta projekt är en teknisk demonstration av ett smart hem-system, utvecklat med fokus på modularitet och separation av ansvar genom etablerade designmönster.
+Smart Home Hub - Designmönster i praktiken
+Detta projekt demonstrerar en arkitektur för ett smart hem-system. Fokus ligger på att skapa en modulär och utökningsbar lösning med hjälp av beprövade designmönster, där logik och ansvarsområden är tydligt separerade.
 
 🛠 Hur man kör programmet
 Öppna projektet: Starta Smarthome.sln i Visual Studio.
 
-Bygg lösningen: Tryck på Ctrl + Shift + B för att kompilera koden och säkerställa att alla beroenden är på plats.
+Bygg lösningen: Tryck på Ctrl + Shift + B för att kompilera alla filer.
 
-Exekvera: Tryck på F5 eller klicka på "Start" för att köra konsolapplikationen.
+Starta: Tryck på F5 för att köra konsolapplikationen.
 
-Resultat: Systemet kommer att demonstrera automatiserade rutiner, manuella kommandon och en återställning av händelseförloppet (Replay) direkt i konsolfönstret.
+Demo: Systemet kommer automatiskt att köra en morgonrutin, byta mellan olika lägen (Eco/Party) och demonstrera historikfunktionen (Replay) i konsolfönstret.
 
 🏗 Implementerade Designmönster
-Facade
-Mönstret är implementerat i klassen SmartHomeFace.cs (eller SmartHomeFacade.cs). Den fungerar som ett förenklat gränssnitt som döljer systemets interna komplexitet för användaren. Genom metoder som MorningRoutine() kan flera enheter styras koordinerat utan att klientkoden behöver känna till detaljerna kring varje enskilt undersystem.
+Facade 
+Mönstret finns i klassen SmartHomeFacade.cs. Den fungerar som ett centralt "API" som samlar komplexa operationer, som MorningRoutine(), på ett ställe. Detta gör att Program.cs förblir ren och lättläst då den inte behöver känna till detaljerna kring hur enskilda enheter eller kommandon fungerar internt.
 
-Command
-Detta mönster hittas i interfacet ICommand.cs och de konkreta klasserna i mappen Commands (t.ex. TurnOnCommand.cs). Varje unik handling kapslas in som ett objekt, vilket gör det möjligt att skicka, köra och lagra instruktioner oberoende av vilken enhet som faktiskt utför dem. Detta skapar en mycket flexibel och utökbar struktur för framtida funktioner.
-
-Command History (Replay)
-Logiken för att hantera historik återfinns i CommandInvoker.cs. Genom att lagra utförda ICommand-objekt i en intern lista kan systemet återskapa tidigare händelser via metoden ReplayLast5(). Detta ger systemet en kraftfull förmåga att logiskt gå tillbaka eller upprepa sekvenser utan att behöva hårdkoda specifika tillstånd för varje enhet.
-
-Observer
-Mönstret implementeras genom IObserver.cs och används av systemets Logger.cs. Husets enheter agerar som subjekt som automatiskt notifierar observatören vid statusförändringar. Detta möjliggör passiv övervakning och loggning av händelser utan att enheterna själva behöver ha kännedom om hur loggningslogiken fungerar.
-
-Singleton
-Detta mönster används i Logger.cs. Genom att använda en privat konstruktor och en statisk instans säkerställs att det endast finns en central loggpunkt i hela applikationen. Detta förhindrar konflikter vid utskrifter och garanterar att all systeminformation samlas på ett och samma ställe under körning.
+Command & Replay
+Detta mönster hittas i interfacet ICommand.cs och de konkreta klasserna i mappen Commands. Genom att kapsla in handlingar som objekt kan vi lagra dem i en historiklista i CommandInvoker.cs. Detta möjliggör systemets Replay-funktion, där de senaste utförda kommandona kan hämtas och köras igen direkt från minnet.
 
 Strategy
-Mönstret återfinns i IModeStrategy.cs samt de konkreta klasserna EcoMode.cs, NormalMode.cs och PartyMode.cs. Det tillåter systemet att växla mellan olika beteenden och regeluppsättningar dynamiskt. Genom att byta strategi ändras hemmet övergripande logik omedelbart utan att någon kod i de enskilda enheterna behöver modifieras.
+Mönstret implementeras via IModeStrategy.cs och klasserna EcoMode, NormalMode och PartyMode. Det tillåter oss att byta ut systemets regler dynamiskt under körning. Genom att sätta ett nytt mode via Facaden ändras hur enheterna beter sig (t.ex. temperaturbegränsningar) utan att vi behöver ändra kod i själva enhetsklasserna.
+
+Singleton
+Används i klassen Logger.cs. Genom en privat konstruktor och en statisk instans (Logger.Instance) säkerställer vi att hela systemet skriver till samma loggpunkt. Detta förhindrar resurskonflikter och gör loggningen tillgänglig för alla komponenter utan att vi behöver skicka runt objektet som en parameter.
+
+Observer
+Loggern implementerar även interfacet IObserver.cs. Systemets enheter notifierar denna centrala punkt när deras status ändras (t.ex. när en lampa tänds). Detta skapar en löst kopplad arkitektur där loggning sker automatiskt som en reaktion på händelser i systemet.
