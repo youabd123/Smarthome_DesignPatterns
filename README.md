@@ -1,27 +1,72 @@
-Smart Home Hub - Designmönster i praktiken
-Detta projekt demonstrerar en arkitektur för ett smart hem-system. Fokus ligger på att skapa en modulär och utökningsbar lösning med hjälp av beprövade designmönster, där logik och ansvarsområden är tydligt separerade.
+Smart Home Control Center
+Hur man kör programmet
+Öppna projektet i Visual Studio
+Tryck på Run ▶️
+Output visas i konsolen
+Beskrivning
 
-🛠 Hur man kör programmet
-Öppna projektet: Starta Smarthome.sln i Visual Studio.
+Detta projekt är ett enkelt Smart Home system där man kan styra en lampa.
 
-Bygg lösningen: Tryck på Ctrl + Shift + B för att kompilera alla filer.
+Programmet visar hur olika delar i ett system kan samarbeta bakom kulisserna. Fokus ligger på struktur och designmönster, inte på grafik.
 
-Starta: Tryck på F5 för att köra konsolapplikationen.
+Syfte
 
-Demo: Systemet kommer automatiskt att köra en morgonrutin, byta mellan olika lägen (Eco/Party) och demonstrera historikfunktionen (Replay) i konsolfönstret.
+Syftet är att visa att jag kan använda designmönster i praktiken, inte bara förstå dem teoretiskt.
 
-🏗 Implementerade Designmönster
-Facade 
-Mönstret finns i klassen SmartHomeFacade.cs. Den fungerar som ett centralt "API" som samlar komplexa operationer, som MorningRoutine(), på ett ställe. Detta gör att Program.cs förblir ren och lättläst då den inte behöver känna till detaljerna kring hur enskilda enheter eller kommandon fungerar internt.
+Jag visar också att jag kan bygga ett system som är tydligt uppdelat och lätt att förstå och vidareutveckla.
 
-Command & Replay
-Detta mönster hittas i interfacet ICommand.cs och de konkreta klasserna i mappen Commands. Genom att kapsla in handlingar som objekt kan vi lagra dem i en historiklista i CommandInvoker.cs. Detta möjliggör systemets Replay-funktion, där de senaste utförda kommandona kan hämtas och köras igen direkt från minnet.
+Designmönster
+Observer
 
-Strategy
-Mönstret implementeras via IModeStrategy.cs och klasserna EcoMode, NormalMode och PartyMode. Det tillåter oss att byta ut systemets regler dynamiskt under körning. Genom att sätta ett nytt mode via Facaden ändras hur enheterna beter sig (t.ex. temperaturbegränsningar) utan att vi behöver ändra kod i själva enhetsklasserna.
+Observer används i Lamp.cs tillsammans med Dashboard, Logger och AuditService.
+
+När lampan tänds skickas ett meddelande till alla observers direkt. Detta gör att flera delar av systemet kan reagera samtidigt utan att Lamp behöver känna till dem.
+
+Command
+
+Command används i TurnOnCommand.cs, TurnOffCommand.cs och CommandInvoker.cs.
+
+Istället för att köra kod direkt kapslas handlingar in i objekt. Invokern kör kommandon och sparar dem, vilket gör att vi kan köra dem igen med replay.
+
+Facade
+
+Facade finns i SmartHomeFacade.cs.
+
+Den gör att Program.cs inte behöver prata med alla klasser direkt. Istället används enkla metoder som TurnOnLamp() och Replay(), vilket gör koden renare.
 
 Singleton
-Används i klassen Logger.cs. Genom en privat konstruktor och en statisk instans (Logger.Instance) säkerställer vi att hela systemet skriver till samma loggpunkt. Detta förhindrar resurskonflikter och gör loggningen tillgänglig för alla komponenter utan att vi behöver skicka runt objektet som en parameter.
 
-Observer
-Loggern implementerar även interfacet IObserver.cs. Systemets enheter notifierar denna centrala punkt när deras status ändras (t.ex. när en lampa tänds). Detta skapar en löst kopplad arkitektur där loggning sker automatiskt som en reaktion på händelser i systemet.
+Singleton används i Logger.cs.
+
+Det säkerställer att det bara finns en logger i hela systemet. Alla delar använder samma instans, vilket gör loggningen konsekvent.
+
+Struktur
+
+Projektet är uppdelat efter ansvar:
+
+Devices → Lamp
+Observers → Dashboard, Logger, AuditService
+Command → ICommand, Commands, CommandInvoker
+Facade → SmartHomeFacade
+Program.cs → startpunkt
+Klassdiagram
+
+Klassdiagram finns som PDF i projektet.
+
+Det visar hur klasserna hänger ihop och vilka relationer de har.
+
+Exempel output
+[Dashboard] Lampan tändes
+[LOG - 20:35:28]: Lampan tändes
+[Audit] Lampan tändes
+
+--- System Replay ---
+[Dashboard] Lampan tändes
+[LOG - 20:35:28]: Lampan tändes
+[Audit] Lampan tändes
+--- Replay slut ---
+Reflektion
+
+Designmönster gör koden mer strukturerad och flexibel. Det blir lättare att ändra och lägga till funktioner utan att påverka resten av systemet.
+
+Samtidigt är det viktigt att inte överanvända dem i små projekt, eftersom det kan göra koden onödigt komplex. I detta projekt har jag försökt hålla en balans mellan enkelhet och struktur.
