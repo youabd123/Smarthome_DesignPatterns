@@ -8,16 +8,16 @@ namespace Smarthome
 {
     public class TurnOnCommand : ICommand
     {
-        private IDevice _device;
+        private Lamp _lamp;
 
-        public TurnOnCommand(IDevice device)
+        public TurnOnCommand(Lamp lamp)
         {
-            _device = device;
+            _lamp = lamp;
         }
 
         public void Execute()
         {
-            _device.TurnOn();
+            _lamp.TurnOn();
         }
     }
 }

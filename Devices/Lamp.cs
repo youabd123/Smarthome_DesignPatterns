@@ -4,25 +4,43 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Smarthome
 {
-    public class Lamp : IDevice
+    public class Lamp
     {
+        private List<IObserver> _observers = new List<IObserver>();
+
         public bool IsOn { get; private set; }
+
+        public void AddObserver(IObserver observer)
+        {
+            _observers.Add(observer);
+        }
 
         public void TurnOn()
         {
             IsOn = true;
-            // Singleton + Observer-logik:
-            Logger.Instance.Log("Lampan har tänds.");
+            Notify("Lampan tändes");
         }
 
         public void TurnOff()
         {
             IsOn = false;
-            Logger.Instance.Log("Lampan har släckts.");
+            Notify("Lampan släcktes");
         }
 
-        public string GetStatus() => IsOn ? "Tänd" : "Släckt";
+        private void Notify(string message)
+        {
+            foreach (var observer in _observers)
+            {
+                observer.Update(message);
+            }
+        }
+
+        public string GetStatus()
+        {
+            return IsOn ? "Tänd" : "Släckt";
+        }
     }
 }
